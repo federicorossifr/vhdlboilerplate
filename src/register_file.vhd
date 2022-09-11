@@ -14,9 +14,13 @@ entity register_file is
   port (
     clk: in std_logic;
     rst: in std_logic;
-    idx: in std_logic_vector(selbits downto 1);
+    w:   in std_logic;
+    idx_1: in std_logic_vector(selbits downto 1);
+    idx_2: in std_logic_vector(selbits downto 1);
     din: in std_logic_vector(rbits downto 1);
-    dout: out regfile_out(0 to nregs-1)(1 to rbits)
+    dout_1: out std_logic_vector(rbits downto 1);
+    dout_2: out std_logic_vector(rbits downto 1)
+
   ) ;
 end register_file;
 
@@ -26,14 +30,14 @@ architecture reg_arch of register_file is
         port (
           clock: in std_logic;
           rst: in std_logic;
-          data_in: in std_ulogic_vector(1 to nbits);
-          data_out: out std_ulogic_vector(1 to nbits);
+          data_in: in std_logic_vector(1 to nbits);
+          data_out: out std_logic_vector(1 to nbits);
           ld: in std_logic
         ) ;
     end component nregister;
 
     signal sel_v: std_logic_vector(nregs - 1 downto 0):= (others => '0');
-
+    signal dout_v: regfile_out(nregs - 1 downto 0)(1 to rbits);
 begin
     gen_regs: for ii in 0 to nregs-1 generate
         reg: nregister 
@@ -43,15 +47,22 @@ begin
             rst => rst,
             data_in => din,
             ld => sel_v(ii),
-            data_out => dout(ii)
+            data_out => dout_v(ii)
         );
     end generate gen_regs;
 
-    proc: process(clk,rst)
+    sel: process(w,idx_1,idx_2)
     begin
-        if (clk='1' and clk'event) then
+        if (w = '1') then
             sel_v <= (others => '0');
-            sel_v(to_integer(unsigned(idx))) <= '1';
+            sel_v(to_integer(unsigned(idx_1))) <= '1';
+        else 
+            sel_v <= (others => '0');                
         end if;
-    end process proc;
+
+        dout_1 <= dout_v(to_integer(unsigned(idx_1)));
+        dout_2 <= dout_v(to_integer(unsigned(idx_2)));
+
+    end process sel;
+
 end reg_arch ; -- arch

@@ -16,17 +16,23 @@ architecture behavior of register_file_tb is
         port (
             clk: in std_logic;
             rst: in std_logic;
-            idx: in std_logic_vector(1 to selbits);
-            din: in std_logic_vector(1 to rbits);
-            dout: out std_logic_vector(1 to rbits)
+            w:   in std_logic;
+            idx_1: in std_logic_vector(selbits downto 1);
+            idx_2: in std_logic_vector(selbits downto 1);
+            din: in std_logic_vector(rbits downto 1);
+            dout_1: out std_logic_vector(rbits downto 1);
+            dout_2: out std_logic_vector(rbits downto 1)
         ) ;
     end component register_file;
 
     signal clk  : std_logic := '1';
     signal rst  : std_logic := '1';
     signal data: std_logic_vector(1 to 8);
-    signal idx: std_logic_vector(1 to 2) := "XX";
-    signal data_out: std_logic_vector(1 to 8);
+    signal rs1: std_logic_vector(1 to 2) := "XX";
+    signal rs2: std_logic_vector(1 to 2) := "XX";
+    signal w  : std_logic := '0';
+    signal r1: std_logic_vector(1 to 8);
+    signal r2: std_logic_vector(1 to 8);
 
 begin
     
@@ -39,23 +45,28 @@ begin
         clk => clk,
         rst => rst,
         din => data,
-        idx => idx,
-        dout => data_out
+        idx_1 => rs1,
+        idx_2 => rs2,
+        dout_1 => r1,
+        dout_2 => r2,
+        w => w
     );
 
     clk <= not clk after 5 ns;
 
     stim_proc: process
     begin  
-        wait until rising_edge(clk);        
+        wait until rising_edge(clk);
+        w <= '1';   
         rst <= '0';
-        idx <= "00";
+        rs1 <= "00";
+        rs2 <= "00";
         data <= "01001000";
-        wait until rising_edge(clk);  
-        idx <= "01";
-        wait until rising_edge(clk);        
-        idx <= "10";
-        wait until rising_edge(clk);        
-        idx <= "11";
+        wait until rising_edge(clk);
+        w <= '0';
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+
     end process;
 end;
