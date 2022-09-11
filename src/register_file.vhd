@@ -3,6 +3,9 @@ use ieee.std_logic_1164.all;
 use ieee.math_real.all;
 use ieee.numeric_std.all;
 
+library work;
+use work.types.all;
+
 entity register_file is
   generic ( rbits: integer:= 8; 
             nregs: integer := 32; 
@@ -13,7 +16,7 @@ entity register_file is
     rst: in std_logic;
     idx: in std_logic_vector(selbits downto 1);
     din: in std_logic_vector(rbits downto 1);
-    dout: out std_logic_vector(rbits downto 1)
+    dout: out regfile_out(0 to nregs-1)(1 to rbits)
   ) ;
 end register_file;
 
@@ -29,11 +32,7 @@ architecture reg_arch of register_file is
         ) ;
     end component nregister;
 
-
-    type regout is array (0 to nregs-1) of std_logic_vector(1 to rbits);
-
     signal sel_v: std_logic_vector(nregs - 1 downto 0):= (others => '0');
-    signal dout_v: regout;
 
 begin
     gen_regs: for ii in 0 to nregs-1 generate
@@ -44,7 +43,7 @@ begin
             rst => rst,
             data_in => din,
             ld => sel_v(ii),
-            data_out => dout_v(ii)
+            data_out => dout(ii)
         );
     end generate gen_regs;
 
@@ -53,7 +52,6 @@ begin
         if (clk='1' and clk'event) then
             sel_v <= (others => '0');
             sel_v(to_integer(unsigned(idx))) <= '1';
-            dout <= dout_v(to_integer(unsigned(idx)));
         end if;
     end process proc;
 end reg_arch ; -- arch

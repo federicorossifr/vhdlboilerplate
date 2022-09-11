@@ -1,9 +1,15 @@
 BUILD_DIR=$(shell pwd)/build
 SRC_DIR=$(shell pwd)/src
+INC_DIR=$(shell pwd)/include
+
 TEST_DIR=$(shell pwd)/tests
 INC_DIR=$(shell pwd)/include
 OUT=wave.vcd
 GHDL_FLAGS=--std=08
+
+
+definitions: $(INC_DIR)/definitions.vhd
+	cd $(BUILD_DIR); ghdl  -a $(GHDL_FLAGS) $< 
 
 full_adder: $(SRC_DIR)/full_adder.vhd
 	cd $(BUILD_DIR); ghdl  -a $(GHDL_FLAGS) $< 
@@ -11,7 +17,7 @@ full_adder: $(SRC_DIR)/full_adder.vhd
 nregister: $(SRC_DIR)/nregister.vhd
 	cd $(BUILD_DIR); ghdl -a $(GHDL_FLAGS) $< 
 
-register_file: $(SRC_DIR)/register_file.vhd nregister
+register_file: $(SRC_DIR)/register_file.vhd nregister definitions
 	cd $(BUILD_DIR); ghdl -a $(GHDL_FLAGS) $< 
 
 full_adder.e: full_adder
